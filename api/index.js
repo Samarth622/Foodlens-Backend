@@ -50,12 +50,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(compression());
 
-if (process.env.NODE_ENV === "production") {
-  const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-  app.use(limiter);
-} else {
-  logger.info("⚠️ Rate limiter disabled in dev mode");
-}
+// if (process.env.NODE_ENV === "production") {
+//   const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
+//   app.use(limiter);
+// } else {
+//   logger.info("⚠️ Rate limiter disabled in dev mode");
+// }
 
 app.use(
   morgan("combined", {
