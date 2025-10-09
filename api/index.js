@@ -15,7 +15,6 @@ import productRouter from "../routes/product.routes.js";
 import "../services/cron.service.js";
 
 dotenv.config();
-
 connectDB();
 
 const app = express();
@@ -24,68 +23,44 @@ const allowedOrigins = ["http://localhost:5173", "https://www.foodlens.in", "htt
 
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      if (allowedOrigins.indexOf(origin) === -1) {
-        const msg = `The CORS policy for this site does not allow access from the specified Origin.`;
-        return callback(new Error(msg), false);
-      }
+      if (!allowedOrigins.includes(origin)) return callback(new Error("CORS blocked!"), false);
       return callback(null, true);
     },
     credentials: true,
   })
 );
 
-app.use(
-  helmet({
-    contentSecurityPolicy:
-      process.env.NODE_ENV === "production" ? undefined : false,
-    crossOriginEmbedderPolicy: false,
-  })
-);
-
+app.use(helmet({ contentSecurityPolicy: process.env.NODE_ENV === "production" ? undefined : false, crossOriginEmbedderPolicy: false }));
 app.use(express.json({ limit: "10kb" }));
-
 app.use(express.urlencoded({ extended: false }));
-
 app.use(cookieParser());
-
 app.use(compression());
 
 if (process.env.NODE_ENV === "production") {
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
+  const limiter = rateLimit({ windowMs: 15*60*1000, max: 100 });
   app.use(limiter);
 } else {
-  logger.info("⚠️ Rate limiter disabled in development mode");
+  logger.info("⚠️ Rate limiter disabled in dev mode");
 }
 
-app.use(
-  morgan("combined", {
-    stream: { write: (message) => logger.info(message.trim()) },
-  })
-);
+app.use(morgan("combined", { stream: { write: (msg) => logger.info(msg.trim()) } }));
 
 app.use(errorHandler);
 
-app.get("/home", (req, res) => {
-  res.send("Backend is running ✅");
-});
-
+// Routes
+app.get("/home", (req, res) => res.send("Backend is running ✅"));
 app.use("/api/users", userRouter);
-
 app.use("/api/products", productRouter);
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  logger.info(
-    `Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`
-  );
-});
-
+// Export serverless handler
 export const handler = serverless(app);
+
+// ----------------- LOCAL TESTING -----------------
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    logger.info(`Local server running on port ${PORT}`);
+  });
+}
