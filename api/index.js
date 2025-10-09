@@ -54,13 +54,12 @@ app.get("/home", (req, res) => res.send("Backend is running ✅"));
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 
-// Export serverless handler
 export const handler = serverless(app);
 
-// ----------------- LOCAL TESTING -----------------
-if (process.env.NODE_ENV !== "production") {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
-    logger.info(`Local server running on port ${PORT}`);
-  });
-}
+// // ----------------- LOCAL TESTING -----------------
+// if (process.env.NODE_ENV !== "production") {
+//   const PORT = process.env.PORT || 3000;
+//   app.listen(PORT, () => {
+//     logger.info(`Local server running on port ${PORT}`);
+//   });
+// }
