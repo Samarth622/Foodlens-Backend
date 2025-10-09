@@ -71,6 +71,10 @@ app.use(
 
 app.use(errorHandler);
 
+app.get("/", (req, res) => {
+  res.send("Backend is running ✅");
+});
+
 app.use("/api/users", userRouter);
 
 app.use("/api/products", productRouter);
