@@ -7,11 +7,13 @@ function getNextMidnight() {
     now.getFullYear(),
     now.getMonth(),
     now.getDate() + 5,
-    0, 0, 0, 0
+    0,
+    0,
+    0,
+    0
   );
   return nextMidnight;
 }
-
 
 export async function refreshRecipes(userId, userProfile) {
   const response = await geminiRecipe(userProfile);
@@ -22,15 +24,22 @@ export async function refreshRecipes(userId, userProfile) {
 
   return Recipe.create({
     userId,
+    profileVersion: userProfile.profileUpdateCount,
     recipes,
-    expiresAt: getNextMidnight()
+    expiresAt: getNextMidnight(),
   });
 }
 
 export async function getLatestRecipes(userId, userProfile) {
   let recipeDoc = await Recipe.findOne({ userId }).sort({ createdAt: -1 });
 
-  if (!recipeDoc || new Date() >= recipeDoc.expiresAt) {
+  const shouldRefresh =
+    !recipeDoc ||
+    new Date() >= recipeDoc.expiresAt ||
+    recipeDoc.profileVersion !== userProfile.profileUpdateCount;
+
+  if (shouldRefresh) {
+    await Recipe.deleteMany({ userId });
     recipeDoc = await refreshRecipes(userId, userProfile);
   }
 
