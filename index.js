@@ -1,4 +1,5 @@
 import express from "express";
+import serverless from "serverless-http";
 import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
@@ -19,7 +20,7 @@ connectDB();
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173"];
+const allowedOrigins = ["http://localhost:5173", "https://www.foodlens.in", "https://foodlens.in"];
 
 app.use(
   cors({
@@ -86,3 +87,5 @@ app.listen(PORT, () => {
     `Server is running in ${process.env.NODE_ENV} mode on port ${PORT}`
   );
 });
+
+export const handler = serverless(app);
