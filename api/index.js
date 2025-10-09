@@ -72,7 +72,7 @@ app.use(
 
 app.use(errorHandler);
 
-app.get("/", (req, res) => {
+app.get("/home", (req, res) => {
   res.send("Backend is running ✅");
 });
 
