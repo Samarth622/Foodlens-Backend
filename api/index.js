@@ -7,12 +7,12 @@ import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import compression from "compression";
-import logger from "./utils/logger.js";
-import errorHandler from "./middlewares/errorHandler.js";
-import connectDB from "./db/dbConfig.js";
-import userRouter from "./routes/user.routes.js";
-import productRouter from "./routes/product.routes.js";
-import "./services/cron.service.js";
+import logger from "../utils/logger.js";
+import errorHandler from "../middlewares/errorHandler.js";
+import connectDB from "../db/dbConfig.js";
+import userRouter from "../routes/user.routes.js";
+import productRouter from "../routes/product.routes.js";
+import "../services/cron.service.js";
 
 dotenv.config();
 
