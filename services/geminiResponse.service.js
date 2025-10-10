@@ -33,6 +33,8 @@ export const geminiResponse = async (productDetail, userDetail) => {
       You are a nutrition and health assistant. 
       Analyze the product for the given user profile. 
       Respond with **only valid JSON**, no extra text. 
+      Please take care of overallRating because in every product it says avoid if user allergies are present in the product then avoid.
+      Also if product have no allergy according to user profile then give no allergy.
 
       Schema to follow:
 
