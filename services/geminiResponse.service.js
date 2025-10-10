@@ -30,43 +30,85 @@ export const geminiResponse = async (productDetail, userDetail) => {
     }
 
     const prompt = `
-      You are a nutrition and health assistant. 
-      Analyze the product for the given user profile. 
-      Respond with **only valid JSON**, no extra text. 
-      Please take care of overallRating because in every product it says avoid if user allergies are present in the product then avoid.
-      Also if product have no allergy according to user profile then give no allergy.
+      You are a professional Nutrition & Health Assistant AI.
 
-      Schema to follow:
+Your task: Analyze the provided product for the given user profile and output a **personalized, holistic health evaluation** in JSON.
 
-      {
-          "basicInfo": {
-              "productName": "string",
-              "ingredientsList": ["string"],
-              "servingSize": "string"
-          },
-          "personalizedHealthAnalysis": {
-              "overallRating": {value: number, overAll: 100, type: "Avoid | Moderate | Safe"},
-              "keyNutrientsEvaluation": {
-                  "calories": {"value": number|null, "unit":"kcal", "dailyTargetEvaluation":"isGood|isBad"},
-                  "sugar": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
-                  "protein": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
-                  "fat": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
-                  "sodium": {"value": number|null, "unit":"mg", "dailyTargetEvaluation":"isGood|isBad"},
-                  "carbohydrates": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
-                  "fiber": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"}
-              },
-              "allergenAlerts": ["string"],
-              "healthImpactSummary": ["string"]
-          },
-          "recommendations": {
-              "healthyAlternatives": ["string"],
-              "portionAdvice": ["recommendedServing": "string", "timingSuggestion": "string", "frequency": "string"],
-              "generalNutritionalAdvice": ["string"]
-          }
-      }
+✅ STRICT RULES:
 
-      User Profile: ${JSON.stringify(userDetail)}
-      Product: ${JSON.stringify(productDetail)}
+1. Respond with **VALID JSON only**, strictly following the schema below. Do not include explanations, markdown, or extra text.
+2. **Overall Rating ('overallRating') logic**:
+   - **Allergies**: If any ingredient matches a user allergy → "Avoid" (value = 20).
+   - **Medical conditions**: 
+       - Diabetes + high sugar (>15g/serving) → "Avoid"
+       - Hypertension + high sodium (>300mg/serving) → "Avoid"
+       - Kidney or liver issues + high protein/fat/sodium → "Avoid"
+   - **Health goals**:
+       - Weight loss + high calories → "Moderate" (value = 60) or "Avoid"
+       - Weight gain + very low calories/protein → "Moderate" (value = 60)
+   - **Otherwise** → "Safe" (value = 90)
+3. **Allergen Alerts**: Only include allergens matching the user profile. If none → ["No allergy detected based on user profile"]
+4. **Key Nutrient Evaluation**: Consider:
+   - User’s age, weight, height, activity level
+   - Health goals (weight loss/gain/maintain)
+   - Medical conditions (e.g., diabetes, hypertension)
+   - Mark "dailyTargetEvaluation" as:
+       - "isGood" if nutrient is suitable for this user
+       - "isBad" if nutrient exceeds limits for this user
+   - Nutrient thresholds (example):
+       - Sugar > 15g → isBad
+       - Fat > 15g → isBad
+       - Sodium > 300mg → isBad
+       - Calories: evaluate against weight goal
+       - Protein: evaluate against activity level and goal
+5. **Health Impact Summary**: Must include:
+   - Allergies
+   - Nutrient balance for user goals
+   - Conflicting medical conditions
+   - Lifestyle factors (sleep, stress, water intake)
+6. **Recommendations**:
+   - Healthy alternatives based on dietType and foodPreferences
+   - Portion advice (serving size, timing, frequency)
+   - General nutritional advice based on goals, activity, medical info
+7. Always mention "No allergy detected" explicitly if no allergens match.
+
+📘 **JSON Schema**:
+
+{
+  "basicInfo": {
+      "productName": "string",
+      "ingredientsList": ["string"],
+      "servingSize": "string"
+  },
+  "personalizedHealthAnalysis": {
+      "overallRating": {"value": number, "overAll": 100, "type": "Avoid | Moderate | Safe"},
+      "keyNutrientsEvaluation": {
+          "calories": {"value": number|null, "unit":"kcal", "dailyTargetEvaluation":"isGood|isBad"},
+          "sugar": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
+          "protein": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
+          "fat": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
+          "sodium": {"value": number|null, "unit":"mg", "dailyTargetEvaluation":"isGood|isBad"},
+          "carbohydrates": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"},
+          "fiber": {"value": number|null, "unit":"g", "dailyTargetEvaluation":"isGood|isBad"}
+      },
+      "allergenAlerts": ["string"],
+      "healthImpactSummary": ["string"]
+  },
+  "recommendations": {
+      "healthyAlternatives": ["string"],
+      "portionAdvice": [
+          {"recommendedServing": "string", "timingSuggestion": "string", "frequency": "string"}
+      ],
+      "generalNutritionalAdvice": ["string"]
+  }
+}
+
+
+Analyze these inputs holistically:
+User Profile: ${JSON.stringify(userDetail)}
+Product: ${JSON.stringify(productDetail)}
+
+Return **only valid JSON** strictly following the schema.
     `;
 
     const response = await fetch(
