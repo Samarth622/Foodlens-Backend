@@ -1,30 +1,33 @@
-import nodemailer from "nodemailer";
+import Sib from "sib-api-v3-sdk";
 
 const sendEmail = async (options) => {
-  const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || "smtp-relay.brevo.com",
-    port: process.env.EMAIL_PORT || 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
+  // Initialize Brevo client
+  const client = Sib.ApiClient.instance;
+  const apiKey = client.authentications["api-key"];
+  apiKey.apiKey = process.env.BREVO_API_KEY;
 
-  const mailOptions = {
-    from: `"${process.env.FROM_NAME}" <${process.env.FROM_EMAIL}>`,
-    to: options.to,
-    subject: options.subject,
-    text: options.text,
-    html: options.html,
+  const tranEmailApi = new Sib.TransactionalEmailsApi();
+
+  const sender = {
+    email: process.env.FROM_EMAIL,
+    name: process.env.FROM_NAME || "FoodLens",
   };
 
+  const receivers = [{ email: options.to }];
+
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent successfully:", info.messageId);
-    return info;
+    const response = await tranEmailApi.sendTransacEmail({
+      sender,
+      to: receivers,
+      subject: options.subject,
+      htmlContent: options.html,
+      textContent: options.text,
+    });
+
+    console.log("✅ Email sent successfully:", response);
+    return response;
   } catch (error) {
-    console.error("❌ Error sending email:", error);
+    console.error("❌ Error sending email via Brevo API:", error.response?.body || error);
     throw new Error("Email could not be sent. Please try again later.");
   }
 };
