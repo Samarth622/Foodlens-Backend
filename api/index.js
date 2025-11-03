@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import helmet from "helmet";
 import morgan from "morgan";
-import rateLimit from "express-rate-limit";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import logger from "../utils/logger.js";
@@ -22,7 +21,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "https://www.foodlens.in",
   "https://foodlens.in",
-  "https://foodlens-backend.onrender.com"
+  "https://foodlens-backend.onrender.com",
 ];
 
 app.use(
@@ -50,12 +49,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(compression());
 
-// if (process.env.NODE_ENV === "production") {
-//   const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-//   app.use(limiter);
-// } else {
-//   logger.info("⚠️ Rate limiter disabled in dev mode");
-// }
 
 app.use(
   morgan("combined", {
