@@ -123,20 +123,11 @@ export const getCategoryProducts = asyncHandler(async (req, res) => {
   try {
     const category = req.params.category;
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
-
-    if (page < 1 || limit < 1) {
-        return res.status(400).json({ message: "Page and limit must be positive numbers." });
-    }
-
-    const results = await fetchProductsByCategory(category, page, limit );
+    const results = await fetchProductsByCategory(category);
 
     return res.status(200).json({
       success: true,
-      data: results.products,          // The list of products for the current page
-      currentPage: results.currentPage,
-      totalPages: results.totalPages,
+      data: results.products,
       totalItems: results.total,
       message: `Products in category ${category} fetched successfully`,
     });
