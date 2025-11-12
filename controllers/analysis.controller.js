@@ -177,6 +177,7 @@ export const getProductAnalysis = asyncHandler(async (req, res) => {
       return res.status(200).json({
         success: true,
         analysis: cache.aiResponse,
+        product: product,
         message: "Product analyzed successfully (from cache).",
       });
     }
